@@ -1,8 +1,5 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2013)
-and may not be redistributed without written permission.*/
-
-//Using SDL and standard IO
 #include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
 #include <string>
 
@@ -22,28 +19,28 @@ SDL_Surface* gStretchedSurface = NULL;
 SDL_Surface* loadSurface( std::string path )
 {
     //The final optimized image
-	SDL_Surface* optimizedSurface = NULL;
+    SDL_Surface* optimizedSurface = NULL;
 
-	//Load image at specified path
-	SDL_Surface* loadedSurface = SDL_LoadBMP( path.c_str() );
-	if( loadedSurface == NULL )
-	{
-		printf( "Unable to load image %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
-	}
+    //Load image at specified path
+    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+    if( loadedSurface == NULL )
+    {
+        printf( "Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError() );
+    }
     else
-	{
-		//Convert surface to screen format
-		optimizedSurface = SDL_ConvertSurface( loadedSurface, gScreenSurface->format, NULL );
-		if( optimizedSurface == NULL )
-		{
-			printf( "Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
-		}
+    {
+        //Convert surface to screen format
+        optimizedSurface = SDL_ConvertSurface( loadedSurface, gScreenSurface->format, NULL );
+        if( optimizedSurface == NULL )
+        {
+            printf( "Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+        }
 
-		//Get rid of old loaded surface
-		SDL_FreeSurface( loadedSurface );
-	}
+        //Get rid of old loaded surface
+        SDL_FreeSurface( loadedSurface );
+    }
 
-	return optimizedSurface;
+    return optimizedSurface;
 }
 
 //Starts up SDL and creates window
@@ -69,8 +66,18 @@ bool init()
         }
         else
         {
-            //Get window surface
-            gScreenSurface = SDL_GetWindowSurface( gWindow );
+            //Initialize PNG loading
+            int imgFlags = IMG_INIT_PNG;
+            if( !( IMG_Init( imgFlags ) & imgFlags ) )
+            {
+                printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+                success = false;
+            }
+            else
+            {
+                //Get window surface
+                gScreenSurface = SDL_GetWindowSurface( gWindow );
+            }
         }
     }
 
@@ -83,7 +90,7 @@ bool loadMedia()
     //Loading success flag
     bool success = true;
 
-    gStretchedSurface = loadSurface("05_optimized_surface_loading_and_soft_stretching/stretch.bmp");
+    gStretchedSurface = loadSurface("06_extension_libraries_and_loading_other_image_formats/loaded.bmp");
     if( gStretchedSurface == NULL )
 	{
 		printf( "Failed to load stretching image!\n" );
