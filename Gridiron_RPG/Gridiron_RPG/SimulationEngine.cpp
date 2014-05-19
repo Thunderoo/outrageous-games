@@ -32,6 +32,8 @@ void GeneratePlay(Play& generatedPlay)
 		Frame newFrame = GenerateNextFrame(currentFrame);
 		generatedPlay.push_back(newFrame);
 		currentFrame = newFrame;
+
+		fPlayOver = true;
 	}
 }
 
