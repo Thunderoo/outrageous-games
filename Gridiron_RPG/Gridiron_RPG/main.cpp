@@ -6,6 +6,8 @@ and may not be redistributed without written permission.*/
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string>
+#include "SimulationEngine.h"
+
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 1440;
@@ -162,6 +164,10 @@ SDL_Texture* loadTexture( std::string path )
 
 int main( int argc, char* args[] )
 {
+
+	simulation::Game simmedGame;
+	simulation::SimulateGame(simmedGame);
+
 	//Start up SDL and create window
 	if( !init() )
 	{
@@ -184,7 +190,7 @@ int main( int argc, char* args[] )
 
 			SDL_Texture* player_texture = loadTexture("G:\\outrageous-games\\assets\\PlayerIndicator.bmp");
 
-			int i = 0;
+			int delta = 0;
 			//While application is running
 			while( !quit )
 			{
@@ -221,26 +227,19 @@ int main( int argc, char* args[] )
 					SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 + 30, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 + 25);
 				}		 
 
-				//Draw vertical line of yellow dots
-                SDL_SetRenderDrawColor( gRenderer, 0xFF, 0xFF, 0x00, 0xFF );
-                for( int i = 0; i < SCREEN_HEIGHT; i += 4 )
-                {
-                    SDL_RenderDrawPoint( gRenderer, SCREEN_WIDTH / 2, i );
-                }
-
-				SDL_Rect renderQuad = { i+SCREEN_WIDTH/12, 200, 20, 20 };
+				SDL_Rect renderQuad = { delta+SCREEN_WIDTH/12, 200, 20, 20 };
 
 				SDL_RenderCopy( gRenderer, player_texture, NULL, &renderQuad);
 
                 //Update screen
                 SDL_RenderPresent( gRenderer );
 
-				if (i > 400)
+				if (delta > 400)
 					continue;
 				else
 				{
 					if (SDL_GetTicks() % 10 == 0)
-						i++;
+						delta++;
 				}
 			}
 		}
