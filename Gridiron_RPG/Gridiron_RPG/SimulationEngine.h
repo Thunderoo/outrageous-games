@@ -5,7 +5,7 @@
 
 namespace simulation {
 
-	typedef std::vector<Frame> Play;
+	typedef std::vector<Frame*> Play;
 	typedef std::vector<Play> Game;
 
 	bool SimulateGame(Game& simmedGame);

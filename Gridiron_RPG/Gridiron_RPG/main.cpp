@@ -8,10 +8,137 @@ and may not be redistributed without written permission.*/
 #include <string>
 #include "SimulationEngine.h"
 
+using namespace std;
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 1440;
 const int SCREEN_HEIGHT = 640;
+
+//The frames per second
+const int FRAMES_PER_SECOND = 60;
+
+//The timer
+class Timer
+{
+    private:
+    //The clock time when the timer started
+    int startTicks;
+
+    //The ticks stored when the timer was paused
+    int pausedTicks;
+
+    //The timer status
+    bool paused;
+    bool started;
+
+    public:
+    //Initializes variables
+    Timer();
+
+    //The various clock actions
+    void start();
+    void stop();
+    void pause();
+    void unpause();
+
+    //Gets the timer's time
+    int get_ticks();
+
+    //Checks the status of the timer
+    bool is_started();
+    bool is_paused();
+};
+
+Timer::Timer()
+{
+    //Initialize the variables
+    startTicks = 0;
+    pausedTicks = 0;
+    paused = false;
+    started = false;
+}
+
+void Timer::start()
+{
+    //Start the timer
+    started = true;
+
+    //Unpause the timer
+    paused = false;
+
+    //Get the current clock time
+    startTicks = SDL_GetTicks();
+}
+
+void Timer::stop()
+{
+    //Stop the timer
+    started = false;
+
+    //Unpause the timer
+    paused = false;
+}
+
+void Timer::pause()
+{
+    //If the timer is running and isn't already paused
+    if( ( started == true ) && ( paused == false ) )
+    {
+        //Pause the timer
+        paused = true;
+
+        //Calculate the paused ticks
+        pausedTicks = SDL_GetTicks() - startTicks;
+    }
+}
+
+void Timer::unpause()
+{
+    //If the timer is paused
+    if( paused == true )
+    {
+        //Unpause the timer
+        paused = false;
+
+        //Reset the starting ticks
+        startTicks = SDL_GetTicks() - pausedTicks;
+
+        //Reset the paused ticks
+        pausedTicks = 0;
+    }
+}
+
+int Timer::get_ticks()
+{
+    //If the timer is running
+    if( started == true )
+    {
+        //If the timer is paused
+        if( paused == true )
+        {
+            //Return the number of ticks when the timer was paused
+            return pausedTicks;
+        }
+        else
+        {
+            //Return the current time minus the start time
+            return SDL_GetTicks() - startTicks;
+        }
+    }
+
+    //If the timer isn't running
+    return 0;
+}
+
+bool Timer::is_started()
+{
+    return started;
+}
+
+bool Timer::is_paused()
+{
+    return paused;
+}
 
 //Starts up SDL and creates window
 bool init();
@@ -168,6 +295,15 @@ int main( int argc, char* args[] )
 	simulation::Game simmedGame;
 	simulation::SimulateGame(simmedGame);
 
+	//Keep track of the current frame
+    int frame = 0;
+
+    //Whether or not to cap the frame rate
+    bool cap = true;
+
+    //The frame rate regulator
+    Timer fps;
+
 	//Start up SDL and create window
 	if( !init() )
 	{
@@ -188,12 +324,18 @@ int main( int argc, char* args[] )
 			//Event handler
 			SDL_Event e;
 
-			SDL_Texture* player_texture = loadTexture("G:\\outrageous-games\\assets\\PlayerIndicator.bmp");
+			SDL_Texture* player_texture = loadTexture("..\\..\\assets\\dude01_grey.png");
+			SDL_Texture* ball_texture = loadTexture("..\\..\\assets\\ball01.png");
 
-			int delta = 0;
+			simulation::Play currentPlay = *simmedGame.begin();
+			vector<Frame*>::iterator itFrame = currentPlay.begin();
+
 			//While application is running
 			while( !quit )
 			{
+				//Start the frame timer
+				fps.start();
+
 				//Handle events on queue
 				while( SDL_PollEvent( &e ) != 0 )
 				{
@@ -225,21 +367,44 @@ int main( int argc, char* args[] )
 				{
 					SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 - 30, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 - 25);
 					SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 + 30, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 + 25);
-				}		 
+				}
 
-				SDL_Rect renderQuad = { delta+SCREEN_WIDTH/12, 200, 20, 20 };
+				for(vector<PlayerSnapshot>::iterator itPlayer = (*itFrame)->BeginPlayers(); itPlayer != (*itFrame)->EndPlayers(); itPlayer++) {
+					PlayerLocation loc = (*itPlayer).loc;
+					
+					if ((*itPlayer).fHasBall)
+					{
+						int xValue = (int)1440*(loc.first/360.0)-5;
+						int yValue = (int)640*(loc.second/160.0)-15;
+						SDL_Rect renderQuad = { xValue, yValue, 20, 15 };
+						SDL_RenderCopy( gRenderer, ball_texture, NULL, &renderQuad);
+					}
 
-				SDL_RenderCopy( gRenderer, player_texture, NULL, &renderQuad);
+
+					int xValue = (int)1440*(loc.first/360.0)-15;
+					int yValue = (int)640*(loc.second/160.0)-15;
+
+					SDL_Rect renderQuad = { xValue, yValue, 30, 30 };
+
+					SDL_RenderCopyEx( gRenderer, player_texture, NULL, &renderQuad, 180, NULL, SDL_FLIP_NONE);
+
+					
+				}
+				
 
                 //Update screen
                 SDL_RenderPresent( gRenderer );
 
-				if (delta > 400)
-					continue;
-				else
+				if (itFrame != currentPlay.end() - 1)
+					itFrame++;
+
+				//Increment the frame counter
+				frame++;
+				//If we want to cap the frame rate
+				if( ( cap == true ) && ( fps.get_ticks() < 1000 / FRAMES_PER_SECOND ) )
 				{
-					if (SDL_GetTicks() % 10 == 0)
-						delta++;
+					//Sleep the remaining frame time
+					SDL_Delay( ( 1000 / FRAMES_PER_SECOND ) - fps.get_ticks() );
 				}
 			}
 		}
