@@ -41,11 +41,21 @@ bool WideReceiver::MovePlayerOneTickAlongRoute()
     double expectedDirectionDegrees = expectedDirectionRadians * 180/g_Pi;
     expectedDirectionDegrees = expectedDirectionDegrees >= 0 ? expectedDirectionDegrees : expectedDirectionDegrees + 360;
 
-    if (!DoublesEqual(m_direction, expectedDirectionDegrees)) 
-        m_direction = expectedDirectionDegrees;
+    if (!m_AssignedRoute->RouteHasHook() &&  expectedDirectionDegrees > 90 && expectedDirectionDegrees < 270)
+    {
+        expectedDirectionDegrees = expectedDirectionDegrees < 180 ? 90 : 270;
+        m_currentWaypointGoal->first = m_currentLocation.first - m_startLocation.first;
+    }
 
-    if (m_velocity == 0)
-        m_velocity = 24;
+    //Can't accelerate when turning
+    if (!DoublesEqual(m_direction, expectedDirectionDegrees)) 
+        if (fmod(m_direction + 180, 360) > expectedDirectionDegrees)
+            m_direction = m_direction + m_turnSpeed/60 > expectedDirectionDegrees ? expectedDirectionDegrees :  fmod(m_direction + m_turnSpeed/60, 360);
+        else
+            m_direction = 360 + fmod(m_direction - m_turnSpeed/60, 360);
+    else
+        if (m_velocity < m_maxSpeed)
+            m_velocity += m_acceleration/60;
 
     m_currentLocation.first += m_velocity/60*cos(m_direction*g_Pi/180);
     m_currentLocation.second += m_velocity/60*sin(m_direction*g_Pi/180);
@@ -61,11 +71,33 @@ bool WideReceiver::UpdatePlayer()
     WideRecieverState wrState = CurrentState();
 
     if (wrState == LINEDUP)
-        SetState(WideRecieverState::RUNNINGROUTE);
+        SetState(WideRecieverState::RUNNING_ROUTE);
 
-    if (wrState == RUNNINGROUTE)
+    if (wrState == RUNNING_ROUTE)
 	    if (MovePlayerOneTickAlongRoute())
             playFinished = true;
 
 	return playFinished;
+}
+
+bool Quarterback::UpdatePlayer()
+{
+    bool playFinished = false;
+
+    PlayerLocation loc = GetLocation();
+    QuarterbackState qbState = CurrentState();
+
+    if (qbState == UNDER_CENTRE)
+    {
+        GiveBall();
+        SetState(DROPPING_BACK);
+        return playFinished;
+    }
+    
+    if (qbState == DROPPING_BACK)
+    {
+
+    }
+
+    return playFinished;
 }

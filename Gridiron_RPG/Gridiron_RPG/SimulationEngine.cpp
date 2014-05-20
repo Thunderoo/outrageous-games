@@ -21,9 +21,11 @@ bool IncrementPlay(PlayState* state)
 PlayState* InitialisePlayState(vector<Route*>& routes)
 {
 	PlayState* state = new PlayState();
-	WideReceiver* pl1 = new WideReceiver(make_pair(30, 80), 1);
+	WideReceiver* pl1 = new WideReceiver(make_pair(30, 130), 1);
+    Quarterback* pl2 = new Quarterback(make_pair(30, 80), 1);
     pl1->AssignRoute(routes[0]);
 	state->AddPlayer(pl1);
+    state->AddPlayer(pl2);
 
 	return state;
 }
@@ -46,7 +48,7 @@ vector<Route*> GenerateRoutes()
 {
     pair<double, double> start(0,0);
     pair<double, double> intermediate (40,0);
-    pair<double, double> end (80,-40);
+    pair<double, double> end (40,-40);
     RouteWaypoints waypoints;
     waypoints.push_back(start);
     waypoints.push_back(intermediate);
@@ -62,6 +64,8 @@ vector<Route*> GenerateRoutes()
 
 bool simulation::SimulateGame(Game& simmedGame) 
 {
+
+
 
     vector<Route*> routes = GenerateRoutes();
 	//Generate one play

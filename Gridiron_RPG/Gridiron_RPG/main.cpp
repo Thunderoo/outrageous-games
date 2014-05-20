@@ -372,18 +372,18 @@ int main( int argc, char* args[] )
 
 				for(vector<PlayerSnapshot>::iterator itPlayer = (*itFrame)->BeginPlayers(); itPlayer != (*itFrame)->EndPlayers(); itPlayer++) {
 					PlayerLocation loc = (*itPlayer).loc;
-                    double rotation = (*itPlayer).rotation + 180;
+                    double rotation = 180 - (*itPlayer).rotation;
 					if ((*itPlayer).fHasBall)
 					{
 						int xValue = static_cast<int>(1440*(loc.first/360.0))-5;
-						int yValue = static_cast<int>(640*(loc.second/160.0))-15;
+						int yValue = static_cast<int>(640*(1-(loc.second/160.0)))-15;
 						SDL_Rect renderQuad = { xValue, yValue, 20, 15 };
 						SDL_RenderCopy( gRenderer, ball_texture, NULL, &renderQuad);
 					}
 
 
 					int xValue = static_cast<int>(1440*(loc.first/360.0))-15;
-					int yValue = static_cast<int>(640*(loc.second/160.0))-15;
+					int yValue = static_cast<int>(640*(1-(loc.second/160.0)))-15;
 
 					SDL_Rect renderQuad = { xValue, yValue, 30, 30 };
 

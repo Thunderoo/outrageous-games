@@ -2,8 +2,7 @@
 
 #include <math.h>
 #include "Route.h"
-
-static double g_Pi = 3.14159265;
+#include "Rotation.h"
 
 typedef std::pair<double, double> PlayerLocation; 
 
@@ -29,8 +28,12 @@ protected:
 	PlayerLocation m_startLocation;
 	PlayerLocation m_currentLocation;
 	double m_velocity; //Feet per second. A 5 second 40 yard dash averages 24 feet per second.
-	double m_direction; //Degrees based on the usual cartesian definition; 0 horizontal right, 90 vertical up, 180 horizontal left, 270 vertical down
+	Rotation m_direction; //Degrees based on the usual cartesian definition; 0 horizontal right, 90 vertical up, 180 horizontal left, 270 vertical down
 	bool m_fHasBall;
+
+    double m_maxSpeed;
+    double m_acceleration;
+    double m_turnSpeed;
 
 public:
 	BasePlayer(PlayerLocation startingLoc, int id) :
@@ -39,7 +42,10 @@ public:
         m_startLocation(startingLoc),
 		m_fHasBall(false),
         m_velocity(0),
-        m_direction(0)
+        m_direction(Rotation(0)),
+        m_maxSpeed(40),
+        m_acceleration(20),
+        m_turnSpeed(180)
 	{
 	}
 
@@ -52,7 +58,7 @@ public:
 
 	int GetId() const {return m_id;}
 	PlayerLocation GetLocation() const {return m_currentLocation;}
-    double GetRotation() const {return m_direction;}
+    Rotation GetRotation() const {return m_direction;}
 
 	void UpdateLocation(PlayerLocation loc) {m_currentLocation.first = loc.first; m_currentLocation.second = loc.second;}
 
@@ -60,8 +66,8 @@ public:
 };
 
 enum WideRecieverState{LINEDUP, 
-    RUNNINGROUTE, RUNNINGWITHBALL,
-    RUNBLOCKING, PURSUINGBALLCARRIER};
+    RUNNING_ROUTE, CATCHING_BALL, RUNNING_WITH_BALL,
+    RUN_BLOCKING, PURSUING_BALL_CARRIER};
 
 class WideReceiver : public BasePlayer
 {
@@ -85,4 +91,23 @@ private:
     Route* m_AssignedRoute;
     RouteWaypoints::iterator m_currentWaypointGoal;
     WideRecieverState m_currentState;
+};
+
+enum QuarterbackState{UNDER_CENTRE, 
+    DROPPING_BACK, PASSING, POST_PASSING};
+
+class Quarterback : public BasePlayer
+{
+public:
+    Quarterback(PlayerLocation startLoc, int id) :
+      BasePlayer(startLoc, id),
+      m_currentState(UNDER_CENTRE)
+      {}
+
+    bool UpdatePlayer();
+    QuarterbackState CurrentState() {return m_currentState;}
+    void SetState(QuarterbackState newState) {m_currentState = newState;}
+
+private:
+    QuarterbackState m_currentState;
 };

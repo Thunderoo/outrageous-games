@@ -4,6 +4,8 @@
 #include "Player.h"
 
 
+enum CurrentPlayState{PRE_SNAP, QB_DROPBACK, QB_THROWING, BALL_IN_AIR};
+
 class PlayState 
 {
 public:
