@@ -24,7 +24,7 @@ bool WideReceiver::MovePlayerOneTickAlongRoute()
             return true;
 
     //Calculate target location
-    PlayerLocation targetLocation = m_currentLocation + *m_currentWaypointGoal;
+    PlayerLocation targetLocation = m_startLocation + *m_currentWaypointGoal;
 
     //Is the player at the target location? If so we need the next target
     if (ApproxEqual(targetLocation, m_currentLocation) && m_currentWaypointGoal != m_AssignedRoute->LastWaypoint()) 
@@ -32,14 +32,14 @@ bool WideReceiver::MovePlayerOneTickAlongRoute()
         m_currentWaypointGoal++;
         if (m_currentWaypointGoal == m_AssignedRoute->LastWaypoint())
             return true;
-        PlayerLocation targetLocation = m_currentLocation + *m_currentWaypointGoal;
+        targetLocation = m_startLocation + *m_currentWaypointGoal;
     }
 
     double deltaX = targetLocation.first - m_currentLocation.first;
     double deltaY = targetLocation.second - m_currentLocation.second;
     double expectedDirectionRadians = CalculateExpectedDirection(deltaX, deltaY);
     double expectedDirectionDegrees = expectedDirectionRadians * 180/g_Pi;
-    expectedDirectionDegrees = expectedDirectionDegrees > 0 ? expectedDirectionDegrees : expectedDirectionDegrees + 360;
+    expectedDirectionDegrees = expectedDirectionDegrees >= 0 ? expectedDirectionDegrees : expectedDirectionDegrees + 360;
 
     if (!DoublesEqual(m_direction, expectedDirectionDegrees)) 
         m_direction = expectedDirectionDegrees;
@@ -47,8 +47,8 @@ bool WideReceiver::MovePlayerOneTickAlongRoute()
     if (m_velocity == 0)
         m_velocity = 24;
 
-    m_currentLocation.first += m_velocity/60*cos(m_direction);
-    m_currentLocation.second += m_velocity/60*sin(m_direction);
+    m_currentLocation.first += m_velocity/60*cos(m_direction*g_Pi/180);
+    m_currentLocation.second += m_velocity/60*sin(m_direction*g_Pi/180);
 
     return false;
 }

@@ -12,7 +12,7 @@ static PlayerLocation operator+(const PlayerLocation& loc1, const PlayerLocation
     return PlayerLocation(loc1.first + loc2.first, loc1.second + loc2.second);
 }
 
-static bool ApproxEqual(const PlayerLocation& loc1, const PlayerLocation& loc2, const double dblEpsilon = 0.01)
+static bool ApproxEqual(const PlayerLocation& loc1, const PlayerLocation& loc2, const double dblEpsilon = 0.5)
 {
     return (fabs(loc1.first - loc2.first) < dblEpsilon) && (fabs(loc1.second - loc2.second) < dblEpsilon);
 }
