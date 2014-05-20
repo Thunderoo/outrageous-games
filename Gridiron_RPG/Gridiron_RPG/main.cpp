@@ -372,7 +372,7 @@ int main( int argc, char* args[] )
 
 				for(vector<PlayerSnapshot>::iterator itPlayer = (*itFrame)->BeginPlayers(); itPlayer != (*itFrame)->EndPlayers(); itPlayer++) {
 					PlayerLocation loc = (*itPlayer).loc;
-                    double rotation = 180 - (*itPlayer).rotation;
+                    double rotation = 180 - ((*itPlayer).rotation*180/g_Pi);
 					if ((*itPlayer).fHasBall)
 					{
 						int xValue = static_cast<int>(1440*(loc.first/360.0))-5;

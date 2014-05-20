@@ -29,7 +29,7 @@ public:
 	{
 		for(std::vector<BasePlayer*>::const_iterator itPlayer = state.BeginPlayers(); itPlayer != state.EndPlayers(); itPlayer++)
 		{
-            PlayerSnapshot snapshot((*itPlayer)->GetId(), (*itPlayer)->GetLocation(), (*itPlayer)->HasBall(), (*itPlayer)->GetRotation());
+			PlayerSnapshot snapshot((*itPlayer)->GetId(), (*itPlayer)->GetLocation(), (*itPlayer)->HasBall(), (*itPlayer)->GetRotation().GetValue());
 			m_playerList.push_back(snapshot);
 		}
 	}

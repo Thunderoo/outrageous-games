@@ -78,6 +78,7 @@
     <ClInclude Include="Frame.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayState.h" />
+    <ClInclude Include="Rotation.h" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="SimulationEngine.h" />
   </ItemGroup>

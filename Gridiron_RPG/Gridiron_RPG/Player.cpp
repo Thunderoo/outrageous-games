@@ -1,9 +1,6 @@
 #include "Player.h"
 #include <cmath>
 
-
-
-
 double CalculateExpectedDirection(double x, double y)
 {
     if (x == 0 && y > 0)
@@ -16,6 +13,20 @@ double CalculateExpectedDirection(double x, double y)
     double directionDegrees = directionRadians * 180/g_Pi;
 
     return directionRadians;
+}
+
+void DetermineNewDirection(Rotation& currentRotation, const Rotation& requiredDirection, double turnSpeed) 
+{
+	if (requiredDirection > currentRotation)
+	{
+		Rotation newRotation(currentRotation.GetValue() + turnSpeed/60*g_Pi/180);
+		currentRotation = newRotation > requiredDirection ? requiredDirection : newRotation;
+	}
+    else 
+    {
+		Rotation newRotation(currentRotation.GetValue() - turnSpeed/60*g_Pi/180);
+		currentRotation = requiredDirection > newRotation ? requiredDirection : newRotation;
+	}
 }
 
 bool WideReceiver::MovePlayerOneTickAlongRoute() 
@@ -35,30 +46,30 @@ bool WideReceiver::MovePlayerOneTickAlongRoute()
         targetLocation = m_startLocation + *m_currentWaypointGoal;
     }
 
-    double deltaX = targetLocation.first - m_currentLocation.first;
-    double deltaY = targetLocation.second - m_currentLocation.second;
-    double expectedDirectionRadians = CalculateExpectedDirection(deltaX, deltaY);
-    double expectedDirectionDegrees = expectedDirectionRadians * 180/g_Pi;
-    expectedDirectionDegrees = expectedDirectionDegrees >= 0 ? expectedDirectionDegrees : expectedDirectionDegrees + 360;
 
-    if (!m_AssignedRoute->RouteHasHook() &&  expectedDirectionDegrees > 90 && expectedDirectionDegrees < 270)
+	Rotation expectedDirection(CalculateExpectedDirection(targetLocation.first - m_currentLocation.first, targetLocation.second - m_currentLocation.second));
+
+	if (!m_AssignedRoute->RouteHasHook() &&  
+		(expectedDirection.GetQuadrant() == SECOND 
+		||
+		expectedDirection.GetQuadrant() == THIRD)
+		)
     {
-        expectedDirectionDegrees = expectedDirectionDegrees < 180 ? 90 : 270;
+        expectedDirection = expectedDirection.GetQuadrant() == SECOND  ? Rotation(g_Pi/2) : Rotation(3*g_Pi/2);
         m_currentWaypointGoal->first = m_currentLocation.first - m_startLocation.first;
     }
 
     //Can't accelerate when turning
-    if (!DoublesEqual(m_direction, expectedDirectionDegrees)) 
-        if (fmod(m_direction + 180, 360) > expectedDirectionDegrees)
-            m_direction = m_direction + m_turnSpeed/60 > expectedDirectionDegrees ? expectedDirectionDegrees :  fmod(m_direction + m_turnSpeed/60, 360);
-        else
-            m_direction = 360 + fmod(m_direction - m_turnSpeed/60, 360);
+    if (m_direction != expectedDirection)
+	{
+		DetermineNewDirection(m_direction, expectedDirection, m_turnSpeed);
+	}
     else
         if (m_velocity < m_maxSpeed)
             m_velocity += m_acceleration/60;
 
-    m_currentLocation.first += m_velocity/60*cos(m_direction*g_Pi/180);
-    m_currentLocation.second += m_velocity/60*sin(m_direction*g_Pi/180);
+    m_currentLocation.first += m_velocity/60*cos(m_direction.GetValue());
+    m_currentLocation.second += m_velocity/60*sin(m_direction.GetValue());
 
     return false;
 }
