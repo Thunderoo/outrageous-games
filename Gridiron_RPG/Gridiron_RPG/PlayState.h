@@ -11,15 +11,15 @@ public:
 	{
 	}
 
-	void AddPlayer(Player* pl) {m_players.push_back(pl);}
+	void AddPlayer(BasePlayer* pl) {m_players.push_back(pl);}
 
-	std::vector<Player*>::iterator BeginPlayers() {return m_players.begin();}
-	std::vector<Player*>::iterator EndPlayers() {return m_players.end();}
+	std::vector<BasePlayer*>::iterator BeginPlayers() {return m_players.begin();}
+	std::vector<BasePlayer*>::iterator EndPlayers() {return m_players.end();}
 
-	std::vector<Player*>::const_iterator BeginPlayers() const {return m_players.begin();}
-	std::vector<Player*>::const_iterator EndPlayers() const {return m_players.end();}
+	std::vector<BasePlayer*>::const_iterator BeginPlayers() const {return m_players.begin();}
+	std::vector<BasePlayer*>::const_iterator EndPlayers() const {return m_players.end();}
 
 private:
-	std::vector<Player*> m_players;
+	std::vector<BasePlayer*> m_players;
 
 };

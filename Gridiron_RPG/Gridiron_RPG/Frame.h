@@ -5,16 +5,18 @@ typedef std::pair<double, double> PlayerLocation;
 
 struct PlayerSnapshot
 {
-	PlayerSnapshot(int id, PlayerLocation location, bool fBall) :
+	PlayerSnapshot(int id, PlayerLocation location, bool fBall, double rot) :
 		loc(location),
 		PlayerID(id),
-		fHasBall(fBall)
+		fHasBall(fBall),
+        rotation(rot)
 	{
 	}
 
 	int PlayerID;
 	PlayerLocation loc;
 	bool fHasBall;
+    double rotation;
 };
 
 
@@ -25,9 +27,9 @@ public:
 		:
 	m_id(0)
 	{
-		for(std::vector<Player*>::const_iterator itPlayer = state.BeginPlayers(); itPlayer != state.EndPlayers(); itPlayer++)
+		for(std::vector<BasePlayer*>::const_iterator itPlayer = state.BeginPlayers(); itPlayer != state.EndPlayers(); itPlayer++)
 		{
-			PlayerSnapshot snapshot((*itPlayer)->GetId(), (*itPlayer)->GetLocation(), (*itPlayer)->HasBall());
+            PlayerSnapshot snapshot((*itPlayer)->GetId(), (*itPlayer)->GetLocation(), (*itPlayer)->HasBall(), (*itPlayer)->GetRotation());
 			m_playerList.push_back(snapshot);
 		}
 	}

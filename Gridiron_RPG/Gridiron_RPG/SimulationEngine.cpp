@@ -6,26 +6,13 @@
 using namespace std;
 using namespace simulation;
 
-		
-bool UpdatePlayer(Player& player)
-{
-	//Continue route
-	PlayerLocation loc = player.GetLocation();
-	loc.first += 0.4;
-
-	player.UpdateLocation(loc);
-
-	if (loc.first >= 150)
-		return true;
-	return false;
-}
 
 bool IncrementPlay(PlayState* state) 
 {
 	bool fPlayIsOver = false;
-	for(vector<Player*>::iterator itPlayer = state->BeginPlayers(); itPlayer != state->EndPlayers(); itPlayer++)
+	for(vector<BasePlayer*>::iterator itPlayer = state->BeginPlayers(); itPlayer != state->EndPlayers(); itPlayer++)
 	{
-		if (UpdatePlayer(*(*itPlayer)))
+        if ((*itPlayer)->UpdatePlayer())
 			fPlayIsOver = true;
 	}
 	return fPlayIsOver;
@@ -34,9 +21,8 @@ bool IncrementPlay(PlayState* state)
 PlayState* InitialisePlayState()
 {
 	PlayState* state = new PlayState();
-	Player* pl1 = new Player(make_pair(30, 80), Position::WR, 1);
-	Player* pl2 = new Player(make_pair(30, 140), Position::WR, 2);
-	pl1->GiveBall();
+	BasePlayer* pl1 = new WideReceiver(make_pair(30, 80), 1);
+	BasePlayer* pl2 = new WideReceiver(make_pair(30, 140), 2);
 	state->AddPlayer(pl1);
 	state->AddPlayer(pl2);
 

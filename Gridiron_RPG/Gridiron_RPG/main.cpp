@@ -6,6 +6,7 @@ and may not be redistributed without written permission.*/
 #include <SDL_image.h>
 #include <stdio.h>
 #include <string>
+#include <math.h>
 #include "SimulationEngine.h"
 
 using namespace std;
@@ -374,21 +375,19 @@ int main( int argc, char* args[] )
 					
 					if ((*itPlayer).fHasBall)
 					{
-						int xValue = (int)1440*(loc.first/360.0)-5;
-						int yValue = (int)640*(loc.second/160.0)-15;
+						int xValue = static_cast<int>(1440*(loc.first/360.0))-5;
+						int yValue = static_cast<int>(640*(loc.second/160.0))-15;
 						SDL_Rect renderQuad = { xValue, yValue, 20, 15 };
 						SDL_RenderCopy( gRenderer, ball_texture, NULL, &renderQuad);
 					}
 
 
-					int xValue = (int)1440*(loc.first/360.0)-15;
-					int yValue = (int)640*(loc.second/160.0)-15;
+					int xValue = static_cast<int>(1440*(loc.first/360.0))-15;
+					int yValue = static_cast<int>(640*(loc.second/160.0))-15;
 
 					SDL_Rect renderQuad = { xValue, yValue, 30, 30 };
 
-					SDL_RenderCopyEx( gRenderer, player_texture, NULL, &renderQuad, 180, NULL, SDL_FLIP_NONE);
-
-					
+					SDL_RenderCopyEx( gRenderer, player_texture, NULL, &renderQuad, 180, NULL, SDL_FLIP_NONE);			
 				}
 				
 
