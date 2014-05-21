@@ -50,5 +50,8 @@
     <ClInclude Include="Rotation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Play.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

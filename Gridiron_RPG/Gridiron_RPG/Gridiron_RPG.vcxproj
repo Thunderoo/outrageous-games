@@ -76,6 +76,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="Play.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayState.h" />
     <ClInclude Include="Rotation.h" />

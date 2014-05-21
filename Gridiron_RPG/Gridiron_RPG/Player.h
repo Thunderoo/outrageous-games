@@ -45,7 +45,7 @@ public:
         m_direction(Rotation(0)),
         m_maxSpeed(40),
         m_acceleration(20),
-        m_turnSpeed(180)
+        m_turnSpeed(360)
 	{
 	}
 
