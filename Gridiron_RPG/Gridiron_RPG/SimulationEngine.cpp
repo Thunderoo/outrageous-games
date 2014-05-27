@@ -49,12 +49,10 @@ vector<Route*> GenerateRoutes()
     pair<double, double> start(0,0);
     pair<double, double> intermediate (40,0);
     pair<double, double> end (40,-40);
-    pair<double, double> end2 (80,-40);
     RouteWaypoints waypoints;
     waypoints.push_back(start);
     waypoints.push_back(intermediate);
     waypoints.push_back(end);
-    waypoints.push_back(end2);
 
     vector<Route*> routes;
 

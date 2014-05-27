@@ -8,7 +8,9 @@ class PlayDetails
 
 public:
 
-	PlayDetails(){}
+	PlayDetails(PlayType type, PlayerLocation qbDropBackPoint)
+	{
+	}
 
 private:
 
