@@ -8,13 +8,13 @@ class PlayDetails
 
 public:
 
-	PlayDetails(PlayType type, PlayerLocation qbDropBackPoint)
+	PlayDetails(PlayType type, Location qbDropBackPoint)
 	{
 	}
 
 private:
 
 
-	PlayerLocation m_qbDropBackPoint;
+	Location m_qbDropBackPoint;
 	PlayType m_playType;
 }

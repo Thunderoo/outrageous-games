@@ -370,11 +370,14 @@ int main( int argc, char* args[] )
 					SDL_RenderDrawLine( gRenderer, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 + 30, SCREEN_WIDTH/12 + i*12, SCREEN_HEIGHT/2 + 25);
 				}
 
-				for(vector<PlayerSnapshot>::iterator itPlayer = (*itFrame)->BeginPlayers(); itPlayer != (*itFrame)->EndPlayers(); itPlayer++) {
-					PlayerLocation loc = (*itPlayer).loc;
+                bool fBallInAir = true;
+				for(vector<PlayerSnapshot>::iterator itPlayer = (*itFrame)->BeginPlayers(); itPlayer != (*itFrame)->EndPlayers(); itPlayer++) 
+                {
+					Location loc = (*itPlayer).loc;
                     double rotation = 180 - ((*itPlayer).rotation*180/g_Pi);
 					if ((*itPlayer).fHasBall)
 					{
+                        fBallInAir = false;
 						int xValue = static_cast<int>(1440*(loc.first/360.0))-5;
 						int yValue = static_cast<int>(640*(1-(loc.second/160.0)))-15;
 						SDL_Rect renderQuad = { xValue, yValue, 20, 15 };
@@ -389,6 +392,17 @@ int main( int argc, char* args[] )
 
 					SDL_RenderCopyEx( gRenderer, player_texture, NULL, &renderQuad, rotation, NULL, SDL_FLIP_NONE);			
 				}
+                if (fBallInAir)
+                {
+                    
+                    int xValue = static_cast<int>(1440*((*itFrame)->GetBall().loc.first/360.0)-5);
+					int yValue = static_cast<int>(640*(1-((*itFrame)->GetBall().loc.second/160.0))-15);
+                    double rotation = 180 - ((*itFrame)->GetBall().rotation*180/g_Pi);
+
+					SDL_Rect renderQuad = { xValue, yValue, 20, 15 };
+
+					SDL_RenderCopyEx( gRenderer, ball_texture, NULL, &renderQuad, rotation, NULL, SDL_FLIP_NONE);
+                }
 				
 
                 //Update screen

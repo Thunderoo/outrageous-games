@@ -3,15 +3,16 @@
 #include <math.h>
 #include "Route.h"
 #include "Rotation.h"
+#include "Ball.h"
 
-typedef std::pair<double, double> PlayerLocation; 
+typedef std::pair<double, double> Location; 
 
-static PlayerLocation operator+(const PlayerLocation& loc1, const PlayerLocation& loc2) 
+static Location operator+(const Location& loc1, const Location& loc2) 
 {
-    return PlayerLocation(loc1.first + loc2.first, loc1.second + loc2.second);
+    return Location(loc1.first + loc2.first, loc1.second + loc2.second);
 }
 
-static bool ApproxEqual(const PlayerLocation& loc1, const PlayerLocation& loc2, const double dblEpsilon = 0.5)
+static bool ApproxEqual(const Location& loc1, const Location& loc2, const double dblEpsilon = 0.5)
 {
     return (fabs(loc1.first - loc2.first) < dblEpsilon) && (fabs(loc1.second - loc2.second) < dblEpsilon);
 }
@@ -25,8 +26,8 @@ class BasePlayer
 protected:
 
 	int m_id;
-	PlayerLocation m_startLocation;
-	PlayerLocation m_currentLocation;
+	Location m_startLocation;
+	Location m_currentLocation;
 	double m_velocity; //Feet per second. A 5 second 40 yard dash averages 24 feet per second.
 	Rotation m_direction; //Degrees based on the usual cartesian definition; 0 horizontal right, 90 vertical up, 180 horizontal left, 270 vertical down
 	bool m_fHasBall;
@@ -36,7 +37,7 @@ protected:
     double m_turnSpeed;
 
 public:
-	BasePlayer(PlayerLocation startingLoc, int id) :
+	BasePlayer(Location startingLoc, int id) :
 		m_id(id),
 		m_currentLocation(startingLoc),
         m_startLocation(startingLoc),
@@ -50,29 +51,28 @@ public:
 	}
 
 
-	void UpdatePlayerLocation(PlayerLocation loc) {m_currentLocation = loc;}
 
 	void GiveBall() {m_fHasBall = true;}
 	void TakeAwayBall() {m_fHasBall = false;}
 	bool HasBall() {return m_fHasBall;}
 
 	int GetId() const {return m_id;}
-	PlayerLocation GetLocation() const {return m_currentLocation;}
+	Location GetLocation() const {return m_currentLocation;}
     Rotation GetRotation() const {return m_direction;}
+    double GetVelocity() const {return m_velocity;}
 
-	void UpdateLocation(PlayerLocation loc) {m_currentLocation.first = loc.first; m_currentLocation.second = loc.second;}
 
-    virtual bool UpdatePlayer() =0;
+    virtual bool UpdatePlayer(Ball& ball) =0;
 };
 
 enum WideRecieverState{LINEDUP, 
-    RUNNING_ROUTE, CATCHING_BALL, RUNNING_WITH_BALL,
+    RUNNING_ROUTE, RUNNING_ROUTE_LOOKING_FOR_BALL, GETTING_OPEN, CATCHING_BALL, RUNNING_WITH_BALL,
     RUN_BLOCKING, PURSUING_BALL_CARRIER};
 
 class WideReceiver : public BasePlayer
 {
 public:
-    WideReceiver(PlayerLocation startingLoc, int id) :
+    WideReceiver(Location startingLoc, int id) :
       BasePlayer(startingLoc, id),
       m_AssignedRoute(NULL),
       m_currentState(LINEDUP){}
@@ -80,11 +80,13 @@ public:
     void AssignRoute(Route* rte) {m_AssignedRoute = rte; m_currentWaypointGoal = m_AssignedRoute->FirstWaypoint();}
     WideRecieverState CurrentState() {return m_currentState;}
     void SetState(WideRecieverState newState) {m_currentState = newState;}
+    Location GetTargetLocation() {return m_startLocation + *m_currentWaypointGoal;}
+
 
     //Returns true if the player moves
     bool MovePlayerOneTickAlongRoute();
 
-    bool UpdatePlayer();
+    bool UpdatePlayer(Ball& ball);
 
 private:
 
@@ -94,20 +96,40 @@ private:
 };
 
 enum QuarterbackState{UNDER_CENTRE, 
-    DROPPING_BACK, PASSING, POST_PASSING};
+    DROPPING_BACK, STANDING_IN_POCKET, THROWING_BALL, DO_NOTHING};
 
 class Quarterback : public BasePlayer
 {
 public:
-    Quarterback(PlayerLocation startLoc, int id) :
+    Quarterback(Location startLoc, int id, std::vector<WideReceiver*> receivers) :
       BasePlayer(startLoc, id),
-      m_currentState(UNDER_CENTRE)
-      {}
+      m_currentState(UNDER_CENTRE),
+      m_maxDropBackSpeed(20),
+      m_rgReceivers(receivers),
+      m_passVelocity(100)
+    {
+        m_dropBackSpot = Location(startLoc.first - 10, startLoc.second);
+        m_throwTarget = Location(-200, -200);
+    }
 
-    bool UpdatePlayer();
+    bool UpdatePlayer(Ball& ball);
     QuarterbackState CurrentState() {return m_currentState;}
     void SetState(QuarterbackState newState) {m_currentState = newState;}
 
 private:
+
+    bool WrOpenForThrow(WideReceiver* wr);
+    Location WhereToThrow(WideReceiver* wr, double& time);
+
+
+    Location m_throwTarget;
+    Location m_dropBackSpot;
     QuarterbackState m_currentState;
+    double m_maxDropBackSpeed;
+    std::vector<WideReceiver*> m_rgReceivers;
+
+    int m_passWindup;
+    double m_passVelocity;
+
+    Location m_locThrowingLocation;
 };
