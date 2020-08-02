@@ -3,6 +3,7 @@
 #include "PlayState.h"
 #include <vector>
 #include "Ball.h"
+#include "Roster.h"
 
 using namespace std;
 using namespace simulation;
@@ -38,50 +39,63 @@ PlayState* InitialisePlayState(vector<Route*>& routes)
 	return state;
 }
 
-void GeneratePlay(Play& generatedPlay, vector<Route*>& routes)
+vector<Route*> GenerateRoutes()
 {
+	pair<double, double> start(0, 0);
+	pair<double, double> intermediate(80, 0);
+	pair<double, double> end(160, -40);
+	RouteWaypoints waypoints;
+	waypoints.push_back(start);
+	waypoints.push_back(intermediate);
+	waypoints.push_back(end);
+
+	vector<Route*> routes;
+
+	routes.push_back(new Route("Test", waypoints));
+
+	return routes;
+}
+
+Play GeneratePlay()
+{
+	Play new_play = Play();
+
+	vector<Route*> routes = GenerateRoutes();
+
 	bool fPlayOver = false;
 	PlayState* currentState = InitialisePlayState(routes);
 	Frame* frame = new Frame(*currentState);
-	generatedPlay.push_back(frame);
+	new_play.push_back(frame);
 
 	while (!fPlayOver) {
 		fPlayOver = IncrementPlay(currentState);
 		Frame* frame = new Frame(*currentState);
-		generatedPlay.push_back(frame);
+		new_play.push_back(frame);
 	}
+
+	return new_play;
 }
-
-vector<Route*> GenerateRoutes()
-{
-    pair<double, double> start(0,0);
-    pair<double, double> intermediate (80,0);
-    pair<double, double> end (160,-40);
-    RouteWaypoints waypoints;
-    waypoints.push_back(start);
-    waypoints.push_back(intermediate);
-    waypoints.push_back(end);
-
-    vector<Route*> routes;
-
-    routes.push_back(new Route("Test", waypoints));
-
-    return routes;
-}
-
 
 bool simulation::SimulateGame(Game& simmedGame) 
 {
+	// load team rosters
+	Roster rs_A = Roster();
+	Roster rs_B = Roster();
+	// load team game plans
+	// GamePlan gp_A = Gameplan();
+	// GamePlan gp_B = Gameplan();
 
+	bool gameFinished = false;
+	//game state should be tracked here
 
-
-    vector<Route*> routes = GenerateRoutes();
-	//Generate one play
-	Play firstEverPlay;
-
-	GeneratePlay(firstEverPlay, routes);
-
-	simmedGame.push_back(firstEverPlay);
+	while (!gameFinished)
+	{
+		//select a play based on game state
+		
+		Play nextPlay = GeneratePlay();
+		simmedGame.push_back(nextPlay);
+		gameFinished = true;
+	}
 
 	return true;
 }

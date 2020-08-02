@@ -290,9 +290,11 @@ SDL_Texture* loadTexture( std::string path )
 
 int main( int argc, char* args[] )
 {
-
+    //This is the actual sim bit
 	simulation::Game simmedGame;
 	simulation::SimulateGame(simmedGame);
+
+    //This is all rendering, mainly for debugging for now
 
 	//Keep track of the current frame
     int frame = 0;

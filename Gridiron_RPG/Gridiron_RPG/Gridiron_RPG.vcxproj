@@ -140,6 +140,7 @@
     <ClInclude Include="Play.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayState.h" />
+    <ClInclude Include="Roster.h" />
     <ClInclude Include="Rotation.h" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="SimulationEngine.h" />
